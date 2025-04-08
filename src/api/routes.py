@@ -28,7 +28,7 @@ def handle_hello():
 
 @api.route('/user', methods=['POST'])
 def create_user():
-   
+   try:
         email=request.json.get('email')
         password=request.json.get('password')
         name=request.json.get('name')
@@ -49,11 +49,14 @@ def create_user():
 
 
         return jsonify(new_user.serialize()),201
+   except Exception as e:
+        return jsonify({'error': 'Error interno', 'details': str(e)}), 500
 
 
 
 @api.route('/login', methods=['POST'])
 def user_login():
+  try:
        email=request.json.get('email')
        password=request.json.get('password')
        if not email or not password : 
@@ -74,4 +77,6 @@ def user_login():
              return jsonify({'acces token':access_token}),200
        else:
              return {'error':"contraseña incorrecta"},404
-       
+  except Exception as e:
+        return jsonify({'error': 'Error interno', 'details': str(e)}), 500
+
