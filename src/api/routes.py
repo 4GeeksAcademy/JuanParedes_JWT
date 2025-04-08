@@ -5,8 +5,10 @@ from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, User
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
+from flask_bcrypt import Bcrypt
 
 api = Blueprint('api', __name__)
+bcrypt=Bcrypt()
 
 # Allow CORS requests to this API
 CORS(api)
@@ -20,3 +22,30 @@ def handle_hello():
     }
 
     return jsonify(response_body), 200
+
+@api.route('/user', methods=['POST'])
+def create_user():
+   
+        email=request.json.get('email')
+        password=request.json.get('password')
+        name=request.json.get('name')
+        
+        if not email or not password or not name: 
+              return jsonify({'error':'Email , password y name son requeridos'}),400
+        
+        existing_user=User.query.filter_by(email=email).first()
+        if existing_user:
+              return jsonify ({'error':'El email ya existe'}),400
+        
+        password_hash=bcrypt.generate_password_hash(password).decode('utf-8')
+
+        new_user=User(email=email,password=password_hash,name=name)
+
+        db.session.add(new_user)
+        db.session.commit()
+
+
+        return jsonify(new_user.serialize()),201
+
+
+
